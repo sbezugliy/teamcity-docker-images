@@ -44,8 +44,6 @@ ENV DOTNET_CLI_TELEMETRY_OPTOUT=true \
 ENV RVM_PGP_KEYS ${rvmPGPKeys}
 ENV RVM_BASE_RUBY_VERSION ${rvmBaseRubyVersion}
 
-ENV DEFAULT_SHELL_BIN ${defaultShellBin}
-ENV DEFAULT_SHELL_ARGS ${defaultShellArgs}
 # Install Git
 # Install Mercurial
 
