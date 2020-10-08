@@ -20,9 +20,12 @@ LABEL dockerImage.teamcity.version="latest" \
       dockerImage.teamcity.buildNumber="latest"
 
 ARG rvmPGPKeys
+ARG defaultShell
     # Opt out of the telemetry feature
-ENV GIT_SSH_VARIANT=ssh \
-    RVM_PGP_KEYS=${rvmPGPKeys}
+ENV GIT_SSH_VARIANT ssh
+ENV RVM_PGP_KEYS ${rvmPGPKeys}
+SHELL ["${defaultShell}"]
+
 # Install Git
 # Install Mercurial
 RUN mkdir -p /opt/buildagent/system/.teamcity-agent/ && \
@@ -63,8 +66,6 @@ COPY --chown=buildagent:buildagent run-docker.sh /services/run-docker.sh
 
 USER buildagent
 
-RUN set -eux; /bin/bash
-
 RUN set -eux; echo progress-bar >> ~/.curlrc \
     && $(   $(gpg --keyserver hkp://pool.sks-keyservers.net \
                 --recv-keys ${RVM_PGP_KEYS})||\
@@ -76,5 +77,5 @@ RUN set -eux; echo progress-bar >> ~/.curlrc \
                  --recv-keys ${RVM_PGP_KEYS}))\
     && \curl -sSL https://get.rvm.io | bash -s stable
 
-RUN set -eux; source ~/.rvm/scripts/rvm
-RUN set -eux; rvm info
+RUN source ~/.rvm/scripts/rvm
+RUN rvm info
