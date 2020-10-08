@@ -34,6 +34,8 @@ RUN apt-get update && \
                         docker-ce-cli=5:19.03.9~3-0~ubuntu-bionic \
                         containerd.io=1.2.13-2 \
                         bash \
+                        curl \
+                        ca-certificates \
                         systemd && \
     systemctl disable docker && \
     curl -SL "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && \
@@ -60,6 +62,8 @@ COPY --chown=buildagent:buildagent run-docker.sh /services/run-docker.sh
 
 USER buildagent
 
+SHELL [ "/bin/bash", "-l", "-c" ]
+
 RUN set -eux; echo progress-bar >> ~/.curlrc \
     && $(   $(gpg --keyserver hkp://pool.sks-keyservers.net \
                 --recv-keys ${RVM_PGP_KEYS})||\
@@ -69,9 +73,8 @@ RUN set -eux; echo progress-bar >> ~/.curlrc \
                  --recv-keys ${RVM_PGP_KEYS})||\
             $(gpg --keyserver hkp://keyserver.pgp.com \
                  --recv-keys ${RVM_PGP_KEYS}))\
-    && \curl -sSL https://get.rvm.io | bash -s stable
+RUN curl -sSL https://get.rvm.io | bash -s stable
 
-SHELL [ "/bin/bash", "-l", "-c" ]
 RUN source ~/.rvm/scripts/rvm
 RUN rvm install ${rvmBaseRubyVersion}
 RUN rvm info
