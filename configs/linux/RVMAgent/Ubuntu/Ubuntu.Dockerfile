@@ -1,6 +1,4 @@
 # The list of required arguments
-# ARG dotnetCoreLinuxComponentVersion
-# ARG dotnetCoreLinuxComponent
 # ARG teamcityMinimalAgentImage
 
 # Id teamcity-agent
@@ -21,28 +19,14 @@ USER root
 LABEL dockerImage.teamcity.version="latest" \
       dockerImage.teamcity.buildNumber="latest"
 
-ARG dotnetCoreLinuxComponentVersion
 ARG rvmPGPKeys
     # Opt out of the telemetry feature
-ENV DOTNET_CLI_TELEMETRY_OPTOUT=true \
-    # Disable first time experience
-    DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true \
-    # Configure Kestrel web server to bind to port 80 when present
-    ASPNETCORE_URLS=http://+:80 \
-    # Enable detection of running in a container
-    DOTNET_RUNNING_IN_CONTAINER=true \
-    # Enable correct mode for dotnet watch (only mode supported in a container)
-    DOTNET_USE_POLLING_FILE_WATCHER=true \
-    # Skip extraction of XML docs - generally not useful within an image/container - helps perfomance
-    NUGET_XMLDOC_MODE=skip \
-    GIT_SSH_VARIANT=ssh \
-    DOTNET_SDK_VERSION=${dotnetCoreLinuxComponentVersion} \
+ENV GIT_SSH_VARIANT=ssh \
     RVM_PGP_KEYS=${rvmPGPKeys}
 # Install Git
 # Install Mercurial
-ARG dotnetCoreLinuxComponent
-
-RUN apt-get update && \
+RUN mkdir -p /opt/buildagent/system/.teamcity-agent/ && \
+    apt-get update && \
     apt-get install -y git mercurial apt-transport-https software-properties-common && \
     \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
@@ -68,14 +52,6 @@ RUN apt-get update && \
             zlib1g \
         && rm -rf /var/lib/apt/lists/* && \
     \
-# Install [${dotnetCoreLinuxComponentName}](${dotnetCoreLinuxComponent})
-    curl -SL ${dotnetCoreLinuxComponent} --output dotnet.tar.gz \
-        && mkdir -p /usr/share/dotnet \
-        && tar -zxf dotnet.tar.gz -C /usr/share/dotnet \
-        && rm dotnet.tar.gz \
-        && find /usr/share/dotnet -name "*.lzma" -type f -delete \
-        && ln -s /usr/share/dotnet/dotnet /usr/bin/dotnet && \
-    \
     apt-get clean all && \
     \
     usermod -aG docker buildagent
@@ -84,10 +60,6 @@ RUN apt-get update && \
 VOLUME /var/lib/docker
 
 COPY --chown=buildagent:buildagent run-docker.sh /services/run-docker.sh
-
-# Trigger .NET CLI first run experience by running arbitrary cmd to populate local package cache
-RUN dotnet help && \
-    sed -i -e 's/\r$//' /services/run-docker.sh
 
 USER buildagent
 
