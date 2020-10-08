@@ -21,7 +21,7 @@ RUN apt-get update && \
 
 USER buildagent
 
-SHELL [ "echo ${DEFAULT_SHELL_BIN}", "echo ${DEFAULT_SHELL_ARGS}" ]
+SHELL [ "/bin/bash", "-l -c" ]
 
 RUN set -eux; echo progress-bar >> ~/.curlrc \
     && $(   $(gpg --keyserver hkp://pool.sks-keyservers.net \
