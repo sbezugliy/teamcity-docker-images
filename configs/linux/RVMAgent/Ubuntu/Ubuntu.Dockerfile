@@ -20,16 +20,14 @@ LABEL dockerImage.teamcity.version="latest" \
       dockerImage.teamcity.buildNumber="latest"
 
 ARG rvmPGPKeys
-ARG defaultShell
+ARG rvmBaseRubyVersion
     # Opt out of the telemetry feature
 ENV GIT_SSH_VARIANT ssh
 ENV RVM_PGP_KEYS ${rvmPGPKeys}
-SHELL ["${defaultShell}"]
 
 # Install Git
 # Install Mercurial
-RUN mkdir -p /opt/buildagent/system/.teamcity-agent/ && \
-    apt-get update && \
+RUN apt-get update && \
     apt-get install -y git mercurial apt-transport-https software-properties-common && \
     \
     curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add - && \
@@ -40,6 +38,7 @@ RUN mkdir -p /opt/buildagent/system/.teamcity-agent/ && \
     apt-get install -y  docker-ce=5:19.03.9~3-0~ubuntu-bionic \
                         docker-ce-cli=5:19.03.9~3-0~ubuntu-bionic \
                         containerd.io=1.2.13-2 \
+                        bash \
                         systemd && \
     systemctl disable docker && \
     curl -SL "https://github.com/docker/compose/releases/download/1.24.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose && \
@@ -77,5 +76,7 @@ RUN set -eux; echo progress-bar >> ~/.curlrc \
                  --recv-keys ${RVM_PGP_KEYS}))\
     && \curl -sSL https://get.rvm.io | bash -s stable
 
+SHELL [ "/bin/bash", "-l", "-c" ]
 RUN source ~/.rvm/scripts/rvm
+RUN rvm install ${rvmBaseRubyVersion}
 RUN rvm info
