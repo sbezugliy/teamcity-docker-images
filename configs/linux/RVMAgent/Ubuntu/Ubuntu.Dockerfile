@@ -77,8 +77,8 @@ RUN set -eux; echo progress-bar >> ~/.curlrc \
             $(gpg --keyserver hkp://pgp.mit.edu \
                  --recv-keys ${RVM_PGP_KEYS})||\
             $(gpg --keyserver hkp://keyserver.pgp.com \
-                 --recv-keys ${RVM_PGP_KEYS}))\
-RUN curl -sSL https://get.rvm.io | bash -s stable
+                 --recv-keys ${RVM_PGP_KEYS}))
+RUN \curl -sSL https://get.rvm.io | bash -s stable
 
 RUN source ~/.rvm/scripts/rvm
 RUN rvm install ${rvmBaseRubyVersion}
