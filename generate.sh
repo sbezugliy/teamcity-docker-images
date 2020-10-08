@@ -7,4 +7,5 @@ bin/TeamCity.Docker generate -s configs \
 -c context -t generated
 bin/TeamCity.Docker generate -s configs \
 -f "configs/common.config;configs/internal.config;configs/windows.config;configs/linux.config;configs/rvm.config" \
--c context -t context/generated -d .teamcity -r "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022" -b TC_Trunk_BuildDistDocker
+-c context -t context/generated -d .teamcity -r "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022" -b TC_Trunk_BuildDistDocker

@@ -11,7 +11,7 @@ version = "2019.2"
 object push_local_linux_18_04 : BuildType({
 name = "Build and push linux 18.04"
 buildNumberPattern="%dockerImage.teamcity.buildNumber%-%build.counter%"
-description  = "teamcity-server:EAP-linux,EAP teamcity-minimal-agent:EAP-linux,EAP teamcity-agent:EAP-linux,EAP"
+description  = "teamcity-server:EAP-linux,EAP teamcity-minimal-agent:EAP-linux,EAP teamcity-agent:EAP-linux,EAP:EAP-linux-sudo"
 vcs {root(TeamCityDockerImagesRepo)}
 steps {
 dockerCommand {
@@ -87,6 +87,27 @@ teamcity-agent:EAP-linux
 param("dockerImage.platform", "linux")
 }
 
+script {
+name = "context teamcity-agent:EAP-linux-sudo"
+scriptContent = """
+echo 2> context/.dockerignore
+""".trimIndent()
+}
+
+dockerCommand {
+name = "build teamcity-agent:EAP-linux-sudo"
+commandType = build {
+source = file {
+path = """context/generated/linux/Agent/Ubuntu/18.04-sudo/Dockerfile"""
+}
+contextDir = "context"
+namesAndTags = """
+teamcity-agent:EAP-linux-sudo
+""".trimIndent()
+}
+param("dockerImage.platform", "linux")
+}
+
 dockerCommand {
 name = "tag teamcity-server:EAP-linux"
 commandType = other {
@@ -108,6 +129,14 @@ name = "tag teamcity-agent:EAP-linux"
 commandType = other {
 subCommand = "tag"
 commandArgs = "teamcity-agent:EAP-linux %docker.buildRepository%teamcity-agent:EAP-linux"
+}
+}
+
+dockerCommand {
+name = "tag teamcity-agent:EAP-linux-sudo"
+commandType = other {
+subCommand = "tag"
+commandArgs = "teamcity-agent:EAP-linux-sudo %docker.buildRepository%teamcity-agent:EAP-linux-sudo"
 }
 }
 
@@ -138,16 +167,26 @@ namesAndTags = """
 }
 }
 
+dockerCommand {
+name = "push teamcity-agent:EAP-linux-sudo"
+commandType = push {
+namesAndTags = """
+%docker.buildRepository%teamcity-agent:EAP-linux-sudo
+""".trimIndent()
+}
+}
+
 }
 features {
 freeDiskSpace {
-requiredSpace = "3gb"
+requiredSpace = "4gb"
 failBuild = true
 }
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 swabra {
@@ -164,7 +203,7 @@ artifactRules = "TeamCity.zip!/**=>context/TeamCity"
 }
 }
 params {
-param("system.teamcity.agent.ensure.free.space", "3gb")
+param("system.teamcity.agent.ensure.free.space", "4gb")
 }
 })
 
@@ -175,10 +214,10 @@ description  = "teamcity-agent:EAP-linux-sudo"
 vcs {root(TeamCityDockerImagesRepo)}
 steps {
 dockerCommand {
-name = "pull sbezugliy/teamcity-rvm-agent:EAP-linux"
+name = "pull ${teamcityAgentImage}"
 commandType = other {
 subCommand = "pull"
-commandArgs = "sbezugliy/teamcity-rvm-agent:EAP-linux"
+commandArgs = "${teamcityAgentImage}"
 }
 }
 
@@ -229,7 +268,8 @@ failBuild = true
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 swabra {
@@ -247,126 +287,6 @@ artifactRules = "TeamCity.zip!/**=>context/TeamCity"
 }
 params {
 param("system.teamcity.agent.ensure.free.space", "1gb")
-}
-})
-
-object push_local_linux_18_04_2 : BuildType({
-name = "Build and push linux 18.04 2"
-buildNumberPattern="%dockerImage.teamcity.buildNumber%-%build.counter%"
-description  = "teamcity-agent:EAP-linux,EAP:EAP-linux-sudo"
-vcs {root(TeamCityDockerImagesRepo)}
-steps {
-dockerCommand {
-name = "pull jetbrains/teamcity-minimal-agent:EAP-linux"
-commandType = other {
-subCommand = "pull"
-commandArgs = "jetbrains/teamcity-minimal-agent:EAP-linux"
-}
-}
-
-script {
-name = "context teamcity-agent:EAP-linux"
-scriptContent = """
-echo 2> context/.dockerignore
-""".trimIndent()
-}
-
-dockerCommand {
-name = "build teamcity-agent:EAP-linux"
-commandType = build {
-source = file {
-path = """context/generated/linux/RVMAgent/Ubuntu/18.04/Dockerfile"""
-}
-contextDir = "context"
-namesAndTags = """
-teamcity-agent:EAP-linux
-""".trimIndent()
-}
-param("dockerImage.platform", "linux")
-}
-
-script {
-name = "context teamcity-agent:EAP-linux-sudo"
-scriptContent = """
-echo 2> context/.dockerignore
-""".trimIndent()
-}
-
-dockerCommand {
-name = "build teamcity-agent:EAP-linux-sudo"
-commandType = build {
-source = file {
-path = """context/generated/linux/Agent/Ubuntu/18.04-sudo/Dockerfile"""
-}
-contextDir = "context"
-namesAndTags = """
-teamcity-agent:EAP-linux-sudo
-""".trimIndent()
-}
-param("dockerImage.platform", "linux")
-}
-
-dockerCommand {
-name = "tag teamcity-agent:EAP-linux"
-commandType = other {
-subCommand = "tag"
-commandArgs = "teamcity-agent:EAP-linux %docker.buildRepository%teamcity-agent:EAP-linux"
-}
-}
-
-dockerCommand {
-name = "tag teamcity-agent:EAP-linux-sudo"
-commandType = other {
-subCommand = "tag"
-commandArgs = "teamcity-agent:EAP-linux-sudo %docker.buildRepository%teamcity-agent:EAP-linux-sudo"
-}
-}
-
-dockerCommand {
-name = "push teamcity-agent:EAP-linux"
-commandType = push {
-namesAndTags = """
-%docker.buildRepository%teamcity-agent:EAP-linux
-""".trimIndent()
-}
-}
-
-dockerCommand {
-name = "push teamcity-agent:EAP-linux-sudo"
-commandType = push {
-namesAndTags = """
-%docker.buildRepository%teamcity-agent:EAP-linux-sudo
-""".trimIndent()
-}
-}
-
-}
-features {
-freeDiskSpace {
-requiredSpace = "2gb"
-failBuild = true
-}
-dockerSupport {
-cleanupPushedImages = true
-loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
-}
-}
-swabra {
-forceCleanCheckout = true
-}
-}
-dependencies {
-dependency(AbsoluteId("TC_Trunk_BuildDistDocker")) {
-snapshot { onDependencyFailure = FailureAction.IGNORE
-reuseBuilds = ReuseBuilds.ANY }
-artifacts {
-artifactRules = "TeamCity.zip!/**=>context/TeamCity"
-}
-}
-}
-params {
-param("system.teamcity.agent.ensure.free.space", "2gb")
 }
 })
 
@@ -575,7 +495,8 @@ failBuild = true
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 swabra {
@@ -789,7 +710,8 @@ failBuild = true
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 swabra {
@@ -826,7 +748,7 @@ dockerCommand {
 name = "manifest create teamcity-agent:EAP"
 commandType = other {
 subCommand = "manifest"
-commandArgs = "create %docker.buildRepository%teamcity-agent:EAP %docker.buildRepository%teamcity-agent:EAP-linux %docker.buildRepository%teamcity-agent:EAP-linux %docker.buildRepository%teamcity-agent:EAP-nanoserver-1903 %docker.buildRepository%teamcity-agent:EAP-nanoserver-1909"
+commandArgs = "create %docker.buildRepository%teamcity-agent:EAP %docker.buildRepository%teamcity-agent:EAP-linux %docker.buildRepository%teamcity-agent:EAP-nanoserver-1903 %docker.buildRepository%teamcity-agent:EAP-nanoserver-1909"
 }
 }
 dockerCommand {
@@ -920,10 +842,6 @@ snapshot(push_local_linux_18_04_sudo)
 {
 onDependencyFailure =  FailureAction.FAIL_TO_START
 }
-snapshot(push_local_linux_18_04_2)
-{
-onDependencyFailure =  FailureAction.FAIL_TO_START
-}
 snapshot(push_local_windows_1903)
 {
 onDependencyFailure =  FailureAction.FAIL_TO_START
@@ -941,7 +859,8 @@ features {
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 }
@@ -952,6 +871,31 @@ object push_hub_linux: BuildType(
 name = "Push linux"
 buildNumberPattern="%dockerImage.teamcity.buildNumber%-%build.counter%"
 steps {
+dockerCommand {
+name = "pull teamcity-agent:EAP-linux-sudo"
+commandType = other {
+subCommand = "pull"
+commandArgs = "%docker.buildRepository%teamcity-agent:EAP-linux-sudo"
+}
+}
+
+dockerCommand {
+name = "tag teamcity-agent:EAP-linux-sudo"
+commandType = other {
+subCommand = "tag"
+commandArgs = "%docker.buildRepository%teamcity-agent:EAP-linux-sudo %docker.deployRepository%teamcity-agent:EAP-linux-sudo"
+}
+}
+
+dockerCommand {
+name = "push teamcity-agent:EAP-linux-sudo"
+commandType = push {
+namesAndTags = """
+%docker.deployRepository%teamcity-agent:EAP-linux-sudo
+""".trimIndent()
+}
+}
+
 dockerCommand {
 name = "pull teamcity-agent:EAP-linux"
 commandType = other {
@@ -1052,66 +996,17 @@ namesAndTags = """
 }
 }
 
-dockerCommand {
-name = "pull teamcity-agent:EAP-linux-sudo"
-commandType = other {
-subCommand = "pull"
-commandArgs = "%docker.buildRepository%teamcity-agent:EAP-linux-sudo"
-}
-}
-
-dockerCommand {
-name = "tag teamcity-agent:EAP-linux-sudo"
-commandType = other {
-subCommand = "tag"
-commandArgs = "%docker.buildRepository%teamcity-agent:EAP-linux-sudo %docker.deployRepository%teamcity-agent:EAP-linux-sudo"
-}
-}
-
-dockerCommand {
-name = "push teamcity-agent:EAP-linux-sudo"
-commandType = push {
-namesAndTags = """
-%docker.deployRepository%teamcity-agent:EAP-linux-sudo
-""".trimIndent()
-}
-}
-
-dockerCommand {
-name = "pull teamcity-agent:EAP-linux"
-commandType = other {
-subCommand = "pull"
-commandArgs = "%docker.buildRepository%teamcity-agent:EAP-linux"
-}
-}
-
-dockerCommand {
-name = "tag teamcity-agent:EAP-linux"
-commandType = other {
-subCommand = "tag"
-commandArgs = "%docker.buildRepository%teamcity-agent:EAP-linux %docker.deployRepository%teamcity-agent:EAP-linux"
-}
-}
-
-dockerCommand {
-name = "push teamcity-agent:EAP-linux"
-commandType = push {
-namesAndTags = """
-%docker.deployRepository%teamcity-agent:EAP-linux
-""".trimIndent()
-}
-}
-
 }
 features {
 freeDiskSpace {
-requiredSpace = "6gb"
+requiredSpace = "5gb"
 failBuild = true
 }
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 swabra {
@@ -1119,7 +1014,7 @@ forceCleanCheckout = true
 }
 }
 params {
-param("system.teamcity.agent.ensure.free.space", "6gb")
+param("system.teamcity.agent.ensure.free.space", "5gb")
 }
 requirements {
 equals("docker.server.osType", "linux")
@@ -1346,7 +1241,8 @@ failBuild = true
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 swabra {
@@ -1383,7 +1279,7 @@ dockerCommand {
 name = "manifest create teamcity-agent:EAP"
 commandType = other {
 subCommand = "manifest"
-commandArgs = "create %docker.deployRepository%teamcity-agent:EAP %docker.deployRepository%teamcity-agent:EAP-linux %docker.deployRepository%teamcity-agent:EAP-linux %docker.deployRepository%teamcity-agent:EAP-nanoserver-1903 %docker.deployRepository%teamcity-agent:EAP-nanoserver-1909"
+commandArgs = "create %docker.deployRepository%teamcity-agent:EAP %docker.deployRepository%teamcity-agent:EAP-linux %docker.deployRepository%teamcity-agent:EAP-nanoserver-1903 %docker.deployRepository%teamcity-agent:EAP-nanoserver-1909"
 }
 }
 dockerCommand {
@@ -1482,7 +1378,8 @@ features {
 dockerSupport {
 cleanupPushedImages = true
 loginToRegistry = on {
-dockerRegistryId = "PROJECT_EXT_315,PROJECT_EXT_4003,PROJECT_EXT_4022"
+dockerRegistryId = "PROJECT_EXT_315,
+PROJECT_EXT_4003,PROJECT_EXT_4022"
 }
 }
 }
@@ -1492,7 +1389,6 @@ object LocalProject : Project({
 name = "Local registry"
 buildType(push_local_linux_18_04)
 buildType(push_local_linux_18_04_sudo)
-buildType(push_local_linux_18_04_2)
 buildType(push_local_windows_1803)
 buildType(push_local_windows_1809)
 buildType(push_local_windows_1903)

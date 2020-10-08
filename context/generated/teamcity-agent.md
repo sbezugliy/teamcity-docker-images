@@ -19,7 +19,6 @@ When running an image with multi-architecture support, docker will automatically
   - [EAP-linux-sudo](#EAP-linux-sudo)
 - 18.04
   - [EAP-linux](#EAP-linux)
-  - [EAP-linux](#EAP-linux)
 
 #### windows
 
@@ -43,7 +42,6 @@ Supported platforms: linux 18.04, windows 1903, windows 1909
 
 #### Content
 
-- [EAP-linux](#EAP-linux)
 - [EAP-linux](#EAP-linux)
 - [EAP-nanoserver-1903](#EAP-nanoserver-1903)
 - [EAP-nanoserver-1909](#EAP-nanoserver-1909)
@@ -99,43 +97,6 @@ docker pull ubuntu:18.04
 ```
 
 _The required free space to generate image(s) is about **2 GB**._
-### EAP-linux
-
-[Dockerfile](linux/RVMAgent/Ubuntu/18.04/Dockerfile)
-
-This is an official [JetBrains TeamCity](https://www.jetbrains.com/teamcity/) build agent image.
-
-The docker image is available on:
-
-- [https://hub.docker.com/repository/docker/sbezugliy/teamcity-agent](https://hub.docker.com/repository/docker/sbezugliy/teamcity-agent)
-
-Installed components:
-
-- Git
-- Mercurial
-
-Container platform: linux
-
-Docker pull command:
-
-```
-docker pull sbezugliy/teamcity-agent:EAP-linux
-```
-
-Docker build commands:
-
-```
-echo 2> context/.dockerignore
-docker build -f "context/generated/linux/RVMAgent/Ubuntu/18.04/Dockerfile" -t teamcity-agent:EAP-linux "context"
-```
-
-Base images:
-
-```
-docker pull jetbrains/teamcity-minimal-agent:EAP-linux
-```
-
-_The required free space to generate image(s) is about **1 GB**._
 ### EAP-linux-sudo
 
 [Dockerfile](linux/Agent/Ubuntu/18.04-sudo/Dockerfile)
@@ -159,7 +120,10 @@ Docker build commands:
 
 ```
 echo 2> context/.dockerignore
-docker build -f "context/generated/linux/RVMAgent/Ubuntu/18.04/Dockerfile" -t teamcity-agent:EAP-linux "context"
+docker build -f "context/generated/linux/MinimalAgent/Ubuntu/18.04/Dockerfile" -t teamcity-minimal-agent:EAP-linux "context"
+
+echo 2> context/.dockerignore
+docker build -f "context/generated/linux/Agent/Ubuntu/18.04/Dockerfile" -t teamcity-agent:EAP-linux "context"
 
 echo 2> context/.dockerignore
 docker build -f "context/generated/linux/Agent/Ubuntu/18.04-sudo/Dockerfile" -t teamcity-agent:EAP-linux-sudo "context"
@@ -168,10 +132,10 @@ docker build -f "context/generated/linux/Agent/Ubuntu/18.04-sudo/Dockerfile" -t 
 Base images:
 
 ```
-docker pull jetbrains/teamcity-minimal-agent:EAP-linux
+docker pull ubuntu:18.04
 ```
 
-_The required free space to generate image(s) is about **2 GB**._
+_The required free space to generate image(s) is about **3 GB**._
 ### EAP-linux-sudo
 
 [Dockerfile](linux/RVMAgent/Ubuntu/18.04-sudo/Dockerfile)
@@ -182,6 +146,11 @@ This image allows to do *__sudo__* without a password for the *__buildagent__* u
 The docker image is available on:
 
 - [https://hub.docker.com/repository/docker/sbezugliy/teamcity-agent](https://hub.docker.com/repository/docker/sbezugliy/teamcity-agent)
+
+Installed components:
+
+- Git
+- Mercurial
 
 Container platform: linux
 
@@ -201,7 +170,7 @@ docker build -f "context/generated/linux/RVMAgent/Ubuntu/18.04-sudo/Dockerfile" 
 Base images:
 
 ```
-docker pull sbezugliy/teamcity-rvm-agent:EAP-linux
+docker pull ${teamcityAgentImage}
 ```
 
 _The required free space to generate image(s) is about **1 GB**._
