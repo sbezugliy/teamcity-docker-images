@@ -201,7 +201,7 @@ docker build -f "context/generated/linux/RVMAgent/Ubuntu/18.04-sudo/Dockerfile" 
 Base images:
 
 ```
-docker pull jetbrains/teamcity-agent:EAP-linux
+docker pull sbezugliy/teamcity-rvm-agent:EAP-linux
 ```
 
 _The required free space to generate image(s) is about **1 GB**._

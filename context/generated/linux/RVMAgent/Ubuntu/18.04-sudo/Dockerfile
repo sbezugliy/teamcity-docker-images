@@ -1,5 +1,5 @@
 # Default arguments
-ARG teamcityAgentImage='jetbrains/teamcity-agent:EAP-linux'
+ARG teamcityAgentImage='sbezugliy/teamcity-rvm-agent:EAP-linux'
 
 # The list of required arguments
 # ARG teamcityAgentImage
@@ -20,3 +20,20 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 USER buildagent
+
+SHELL [ "echo ${DEFAULT_SHELL_BIN}", "echo ${DEFAULT_SHELL_ARGS}" ]
+
+RUN set -eux; echo progress-bar >> ~/.curlrc \
+    && $(   $(gpg --keyserver hkp://pool.sks-keyservers.net \
+                --recv-keys ${RVM_PGP_KEYS})||\
+            $(gpg --keyserver hkp://ipv4.pool.sks-keyservers.net \
+                --recv-keys ${RVM_PGP_KEYS})||\
+            $(gpg --keyserver hkp://pgp.mit.edu \
+                 --recv-keys ${RVM_PGP_KEYS})||\
+            $(gpg --keyserver hkp://keyserver.pgp.com \
+                 --recv-keys ${RVM_PGP_KEYS}))
+RUN \curl -sSL https://get.rvm.io | bash -s stable
+
+RUN source ~/.rvm/scripts/rvm
+RUN rvm install ${RVM_BASE_RUBY_VERSION}
+RUN rvm info

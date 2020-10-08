@@ -175,10 +175,10 @@ description  = "teamcity-agent:EAP-linux-sudo"
 vcs {root(TeamCityDockerImagesRepo)}
 steps {
 dockerCommand {
-name = "pull jetbrains/teamcity-agent:EAP-linux"
+name = "pull sbezugliy/teamcity-rvm-agent:EAP-linux"
 commandType = other {
 subCommand = "pull"
-commandArgs = "jetbrains/teamcity-agent:EAP-linux"
+commandArgs = "sbezugliy/teamcity-rvm-agent:EAP-linux"
 }
 }
 

@@ -1,4 +1,6 @@
 # Default arguments
+ARG defaultShellArgs='-l -c'
+ARG defaultShellBin='/bin/bash'
 ARG repo='https://hub.docker.com/repository/docker/sbezugliy/'
 ARG rvmBaseRubyVersion='2.7.1'
 ARG rvmPGPKeys='409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB'
@@ -18,10 +20,17 @@ LABEL dockerImage.teamcity.version="latest" \
 
 ARG rvmPGPKeys
 ARG rvmBaseRubyVersion
+
+ARG defaultShell
+ARG defaultShellArgs
     # Opt out of the telemetry feature
 ENV GIT_SSH_VARIANT ssh
-ENV RVM_PGP_KEYS ${rvmPGPKeys}
 
+ENV RVM_PGP_KEYS ${rvmPGPKeys}
+ENV RVM_BASE_RUBY_VERSION ${rvmBaseRubyVersion}
+
+ENV DEFAULT_SHELL_BIN ${defaultShellBin}
+ENV DEFAULT_SHELL_ARGS ${defaultShellArgs}
 RUN apt-get update && \
     apt-get install -y git mercurial apt-transport-https software-properties-common && \
     \
@@ -60,9 +69,7 @@ VOLUME /var/lib/docker
 
 COPY --chown=buildagent:buildagent run-docker.sh /services/run-docker.sh
 
-USER buildagent
-
-SHELL [ "/bin/bash", "-l", "-c" ]
+SHELL [ "echo ${DEFAULT_SHELL_BIN}", "echo ${DEFAULT_SHELL_ARGS}" ]
 
 RUN set -eux; echo progress-bar >> ~/.curlrc \
     && $(   $(gpg --keyserver hkp://pool.sks-keyservers.net \
@@ -72,9 +79,12 @@ RUN set -eux; echo progress-bar >> ~/.curlrc \
             $(gpg --keyserver hkp://pgp.mit.edu \
                  --recv-keys ${RVM_PGP_KEYS})||\
             $(gpg --keyserver hkp://keyserver.pgp.com \
-                 --recv-keys ${RVM_PGP_KEYS}))\
-RUN curl -sSL https://get.rvm.io | bash -s stable
+                 --recv-keys ${RVM_PGP_KEYS}))
 
-RUN source ~/.rvm/scripts/rvm
-RUN rvm install ${rvmBaseRubyVersion}
+RUN \curl -sSL https://get.rvm.io | bash -s stable
+
+USER buildagent
+
+RUN source /etc/profile
+RUN rvm install ${RVM_BASE_RUBY_VERSION}
 RUN rvm info
